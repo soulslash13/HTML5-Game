@@ -323,6 +323,7 @@
 					hitbox.x = 135;
 					hitbox.y = 550;
 					enemyBullet = [];
+					bulletImage = [];
 					playerBullet = [];
 					pbulletImage = [];
 					gameArea.lives-=1;
@@ -334,13 +335,21 @@
 					gameArea.gameOver = true;
 					gameOverText.text ="Game Over";
 				}
+				if(enemyBullet.y>600){
+					enemyBullet.splice(i,1);
+					bulletImage.splice(i,1);
+					
+				}
 			}
 			for(i = 0; i < playerBullet.length; i++){
 				if(playerBullet[i].crashWith(boss)){
-					playerBullet[i].width = 0;
-					playerBullet[i].height = 0;
-					pbulletImage[i].image=null;
+					playerBullet.splice(i,1);
+					pbulletImage.splice(i,1);
 					gameArea.bossDamage+=1;
+				}
+				if(playerBullet[i].crashWith(wall[1])){
+					playerBullet.splice(i,1);
+					pbulletImage.splice(i,1);
 				}
 			}
 			gameArea.clear();
@@ -349,6 +358,53 @@
 				backDrop.y=0;
 			}
 			backDrop.update();
+			hitbox.speedX = 0;
+			hitbox.speedY = 0;
+			if(!gameArea.gameOver){
+				if(gameArea.keys && gameArea.keys[37] && !hitbox.crashWith(wall[4])){
+					hitbox.speedX= -3;
+				}
+				if(gameArea.keys && gameArea.keys[37] && gameArea.keys[16] && !hitbox.crashWith(wall[4])){
+					hitbox.speedX= -1.5;
+				}
+				if(gameArea.keys && gameArea.keys[39] && !hitbox.crashWith(wall[2])){
+					hitbox.speedX= 3;
+				}
+				if(gameArea.keys && gameArea.keys[39] && gameArea.keys[16] && !hitbox.crashWith(wall[2])){
+					hitbox.speedX= 1.5;
+				}
+				if(gameArea.keys && gameArea.keys[38] && !hitbox.crashWith(wall[1])){
+					hitbox.speedY= -3;
+				}
+				if(gameArea.keys && gameArea.keys[38] && gameArea.keys[16] && !hitbox.crashWith(wall[1])){
+					hitbox.speedY= -1.5;
+				}
+				if(gameArea.keys && gameArea.keys[40] && !hitbox.crashWith(wall[3])){
+					hitbox.speedY= 3;
+				}
+				if(gameArea.keys && gameArea.keys[40] && gameArea.keys[16] && !hitbox.crashWith(wall[3])){
+					hitbox.speedY= 1.5;
+				}
+				if(gameArea.keys && gameArea.keys[90] && everyinterval(5)){
+					playerBullet.push(new component(3, 3, null, hitbox.x-3, hitbox.y, 0, -8));
+					pbulletImage.push(new graphic("images/playerbullet.png", hitbox.x-3, hitbox.y));
+					playerBullet.push(new component(3, 3, null, hitbox.x+hitbox.width, hitbox.y, 0, -8));
+					pbulletImage.push(new graphic("images/playerbullet.png", hitbox.x-3, hitbox.y));
+				}
+				hitbox.newPos();
+				if(gameArea.keys && gameArea.keys[16]){
+					playerImage.dx = hitbox.x-5;
+					playerImage.dy = hitbox.y-10;
+					playerImage.update();
+					hitbox.update();
+				}
+				else{
+					hitbox.update();
+					playerImage.dx = hitbox.x-5;
+					playerImage.dy = hitbox.y-10;
+					playerImage.update();
+				}
+			}
 			gameArea.frameNo += 1;
 			if(gameArea.bossDamage>=2000 || gameArea.frameNo>=7200 && !gameArea.gameOver){
 				gameArea.victory = true;
@@ -456,45 +512,6 @@
 						bossRight();
 					}
 				}
-			}
-			hitbox.speedX = 0;
-			hitbox.speedY = 0;
-			if(!gameArea.gameOver){
-				if(gameArea.keys && gameArea.keys[37] && !hitbox.crashWith(wall[4])){
-					hitbox.speedX= -3;
-				}
-				if(gameArea.keys && gameArea.keys[37] && gameArea.keys[16] && !hitbox.crashWith(wall[4])){
-					hitbox.speedX= -1.5;
-				}
-				if(gameArea.keys && gameArea.keys[39] && !hitbox.crashWith(wall[2])){
-					hitbox.speedX= 3;
-				}
-				if(gameArea.keys && gameArea.keys[39] && gameArea.keys[16] && !hitbox.crashWith(wall[2])){
-					hitbox.speedX= 1.5;
-				}
-				if(gameArea.keys && gameArea.keys[38] && !hitbox.crashWith(wall[1])){
-					hitbox.speedY= -3;
-				}
-				if(gameArea.keys && gameArea.keys[38] && gameArea.keys[16] && !hitbox.crashWith(wall[1])){
-					hitbox.speedY= -1.5;
-				}
-				if(gameArea.keys && gameArea.keys[40] && !hitbox.crashWith(wall[3])){
-					hitbox.speedY= 3;
-				}
-				if(gameArea.keys && gameArea.keys[40] && gameArea.keys[16] && !hitbox.crashWith(wall[3])){
-					hitbox.speedY= 1.5;
-				}
-				if(gameArea.keys && gameArea.keys[90] && everyinterval(5)){
-					playerBullet.push(new component(3, 3, null, hitbox.x-3, hitbox.y, 0, -8));
-					pbulletImage.push(new graphic("images/playerbullet.png", hitbox.x-3, hitbox.y));
-					playerBullet.push(new component(3, 3, null, hitbox.x+hitbox.width, hitbox.y, 0, -8));
-					pbulletImage.push(new graphic("images/playerbullet.png", hitbox.x-3, hitbox.y));
-				}
-				hitbox.newPos();
-				hitbox.update();
-				playerImage.dx = hitbox.x-5;
-				playerImage.dy = hitbox.y-15;
-				playerImage.update();
 			}
 			if(gameArea.keys && gameArea.keys[82]){
 					gameArea.reset();

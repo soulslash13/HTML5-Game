@@ -46,7 +46,8 @@
 		var score;
 		var backDrop;
 		var bulletImage = [];
-		var playerImage = [];
+		var playerImage;
+		var pbulletImage = [];
 	
 		function startGame(){
 			backDrop = new graphic("images/backdrop.png", 0, 0, "backdrop");
@@ -323,12 +324,13 @@
 					hitbox.y = 550;
 					enemyBullet = [];
 					playerBullet = [];
+					pbulletImage = [];
 					gameArea.lives-=1;
 				}
 				else if(hitbox.crashWith(enemyBullet[i])){
 					hitbox.width = 0;
 					hitbox.height = 0;
-					playerImage.image = null;
+					playerImage = null;
 					gameArea.gameOver = true;
 					gameOverText.text ="Game Over";
 				}
@@ -337,6 +339,7 @@
 				if(playerBullet[i].crashWith(boss)){
 					playerBullet[i].width = 0;
 					playerBullet[i].height = 0;
+					pbulletImage[i].image=null;
 					gameArea.bossDamage+=1;
 				}
 			}
@@ -482,8 +485,10 @@
 					hitbox.speedY= 1.5;
 				}
 				if(gameArea.keys && gameArea.keys[90] && everyinterval(5)){
-					playerBullet.push(new component(3, 3, "#60fcff", hitbox.x-3, hitbox.y, 0, -8));
-					playerBullet.push(new component(3, 3, "#60fcff", hitbox.x+hitbox.width, hitbox.y, 0, -8));
+					playerBullet.push(new component(3, 3, null, hitbox.x-3, hitbox.y, 0, -8));
+					pbulletImage.push(new graphic("images/playerbullet.png", hitbox.x-3, hitbox.y));
+					playerBullet.push(new component(3, 3, null, hitbox.x+hitbox.width, hitbox.y, 0, -8));
+					pbulletImage.push(new graphic("images/playerbullet.png", hitbox.x-3, hitbox.y));
 				}
 				hitbox.newPos();
 				hitbox.update();
@@ -497,15 +502,20 @@
 			for(i = 0; i < enemyBullet.length; i++){
 				enemyBullet[i].x+=enemyBullet[i].speedX;
 				enemyBullet[i].y+=enemyBullet[i].speedY;
-				bulletImage[i].x = enemyBullet[i].x;
-				bulletImage[i].y = enemyBullet[i].y;
+				bulletImage[i].x = enemyBullet[i].x-1;
+				bulletImage[i].y = enemyBullet[i].y-1;
 				enemyBullet[i].update();
 				bulletImage[i].update();
 			}
 			for(i = 0; i < playerBullet.length; i++){
 				playerBullet[i].x+=playerBullet[i].speedX;
+				pbulletImage[i].x=playerBullet[i].x;
 				playerBullet[i].y+=playerBullet[i].speedY;
+				pbulletImage[i].y=playerBullet[i].y;
 				playerBullet[i].update();
+				if(pbulletImage[i].image!=null){
+					pbulletImage[i].update();
+				}
 			}
 			wall[1].update();
 			wall[2].update();

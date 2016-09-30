@@ -320,6 +320,7 @@
 		function updateGameArea(){
 			for(i = 0; i < enemyBullet.length; i++){
 				if(hitbox.crashWith(enemyBullet[i]) && gameArea.lives>0){
+					explosion = new animatedGraphic("images/explosion.png",0,0,25,25,playerImage.dx,playerImage.dy,25,25,3,5);
 					hitbox.x = 135;
 					hitbox.y = 550;
 					enemyBullet = [];
@@ -329,8 +330,11 @@
 					gameArea.lives-=1;
 				}
 				else if(hitbox.crashWith(enemyBullet[i])){
+					explosion = new animatedGraphic("images/explosion.png",0,0,25,25,playerImage.dx,playerImage.dy,25,25,3,5);
 					hitbox.width = 0;
 					hitbox.height = 0;
+					hitbox.x=0;
+					hitbox.y=0;
 					playerImage = null;
 					gameArea.gameOver = true;
 					gameOverText.text ="Game Over";
@@ -544,6 +548,9 @@
 			lives.update();
 			score.text = "Score: " + gameArea.bossDamage;
 			score.update();
+			if(explosion.aniframe!=explosion.frames-1){
+				explosion.update();
+			}
 		}
 
 	</script>

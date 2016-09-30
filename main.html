@@ -347,7 +347,7 @@
 			}
 			backDrop.update();
 			gameArea.frameNo += 1;
-			if(gameArea.bossDamage>=2000 || gameArea.frameNo>=7200){
+			if(gameArea.bossDamage>=2000 || gameArea.frameNo>=7200 && !gameArea.gameOver){
 				gameArea.victory = true;
 				gameOverText.text ="You Won!"
 			}

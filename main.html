@@ -26,6 +26,7 @@
 	<ul>Controls:
 		<li>Arrow Keys - Move</li>
 		<li>Hold Z - Shoot</li>
+		<li>X - Bomb(clears bullets)</li>
 		<li>Hold Shift - Slow</li>
 		<li>R - Reset</li>
 	</ul>
@@ -34,6 +35,10 @@
 		<li>Shoot the oppossing character to earn 1000 points OR</li>
 		<li>Survive for two minutes</li>
 		<li>Have fun, and good luck... you'll need it.</li>
+	</ul>
+	<ul>Tips:
+		<li>Gain an extra bomb every 250 points.</li>
+		<li>You can see your hitbox when slow.</li>
 	</ul>
 	<script>
 		var hitbox;
@@ -44,12 +49,13 @@
 		var gameOverText;
 		var lives;
 		var score;
+		var bombs;
 		var backDrop;
 		var bulletImage = [];
 		var playerImage;
 		var pbulletImage = [];
-		var test;
 		var bomb;
+		var time;
 	
 		function startGame(){
 			backDrop = new graphic("images/backdrop.png", 0, 0, "backdrop");
@@ -65,6 +71,8 @@
 			gameOverText = new text("50px", "serif", "blue", 25, 300, "");
 			lives = new text("20px", "serif", "white", 10, 20, "Lives:");
 			score = new text("20px", "serif", "white", 200, 20, "Score:");
+			bombs = new text("20px", "serif", "white", 10, 40, "Bombs:");
+			time = new text("20px", "serif", "white", 200, 40, "Time:");
 
 			
 		}
@@ -536,9 +544,10 @@
 			if(gameArea.keys && gameArea.keys[82]){
 				gameArea.reset();
 			}
-			if(gameArea.keys && gameArea.keys[88] && gameArea.bombs>0){
-				bomb = new animatedGraphic("images/explosion.png",0,0,25,25,playerImage.x,playerImage.y,25,25,3,5);
+			if(gameArea.keys && gameArea.keys[88] && gameArea.bombs>0 && gameArea.bombexists==false){
+				bomb = new animatedGraphic("images/explosion.png",0,0,25,25,playerImage.x,playerImage.y,25,25,3,20);
 				gameArea.bombexists=true;
+				gameArea.bombs-=1;
 			}
 			for(i = 0; i < enemyBullet.length; i++){
 				enemyBullet[i].x+=enemyBullet[i].speex;
@@ -574,11 +583,16 @@
 			wall[4].update();
 			boss.update();
 			if(gameArea.bombexists){
+				if(bomb.aniframe==bomb.frames-1){
+					bomb = null;
+					gameArea.bombexists = false;
+				}
 				bomb.width+=10;
 				bomb.x-=5;
 				bomb.height+=10;
 				bomb.y-=5;
 				bomb.update();
+				
 			}
 			guide.x=boss.x;
 			guide.update();
@@ -587,6 +601,14 @@
 			lives.update();
 			score.text = "Score: " + gameArea.bossDamage;
 			score.update();
+			if(gameArea.bossDamage%250==0){
+				gameArea.bombs+=1;
+				gameArea.bossDamage+=1;
+			}
+			bombs.text = "Bombs: " + gameArea.bombs;
+			bombs.update();
+			time.text = "Time: " + Math.floor(gameArea.frameNo/60);
+			time.update();
 			if(explosion.aniframe!=explosion.frames-1){
 				explosion.update();
 			}

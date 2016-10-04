@@ -48,6 +48,8 @@
 		var bulletImage = [];
 		var playerImage;
 		var pbulletImage = [];
+		var test;
+		var bomb;
 	
 		function startGame(){
 			backDrop = new graphic("images/backdrop.png", 0, 0, "backdrop");
@@ -59,6 +61,7 @@
 			wall[3] = new component(300,1,"green",0,600,0,0);
 			wall[4] = new component(1,600,"green",0,0,0,0);
 			boss = new animatedGraphic("images/boss_sprite.png",0,0,15,17,130,20,15,17,3,2);
+			guide = new graphic("images/guide.png", 0, 575, null);
 			gameOverText = new text("50px", "serif", "blue", 25, 300, "");
 			lives = new text("20px", "serif", "white", 10, 20, "Lives:");
 			score = new text("20px", "serif", "white", 200, 20, "Score:");
@@ -82,6 +85,9 @@
 				this.lives = 3;
 				this.bossDamage = 0;
 				this.bossHits = 0;
+				this.bossAttacking = false;
+				this.bombs = 2;
+				this.bombexists = false;
 				this.interval = setInterval(updateGameArea, 16.66);
 				window.addEventListener('keydown',function (e){
 					gameArea.keys = (gameArea.keys || []);
@@ -98,14 +104,8 @@
 				clearInterval(this.interval);
 			},
 			reset : function(){
-				hitbox.x = 135;
-				hitbox.y = 550;
-				hitbox.width = 5;
-				hitbox.height = 5;
-				boss.x = 130;
-				boss.y = 20;
-				boss.width = 20;
-				boss.height = 20;
+				hitbox = new component(5,5,"blue",135,550, 0, 0);
+				boss = new animatedGraphic("images/boss_sprite.png",0,0,15,17,130,20,15,17,3,2);
 				enemyBullet = [];
 				playerBullet = [];
 				gameOverText.text = "";
@@ -118,6 +118,12 @@
 				this.lives = 3;
 				this.bossDamage = 0;
 				this.bossHits = 0;
+				this.bossAttacking = false;
+				this.bombs = 2;
+				this.bombexists = false;
+				lives = new text("20px", "serif", "white", 10, 20, "Lives:");
+				score = new text("20px", "serif", "white", 200, 20, "Score:");
+				playerImage = new animatedGraphic("images/soulveara_spritesheet.png",0,0,15,25,0,0,15,25,3,5);
 			}
 		}
 		
@@ -339,10 +345,15 @@
 					gameArea.gameOver = true;
 					gameOverText.text ="Game Over";
 				}
-				if(enemyBullet.y>600){
+				if(enemyBullet[i].y>600){
 					enemyBullet.splice(i,1);
 					bulletImage.splice(i,1);
-					
+				}
+				if(gameArea.bombexists==true){
+					if(enemyBullet[i].crashWith(bomb)){
+						enemyBullet.splice(i,1);
+						bulletImage.splice(i,1);
+					}
 				}
 			}
 			for(i = 0; i < playerBullet.length; i++){
@@ -428,6 +439,7 @@
 				}
 				if(gameArea.patternTime == 1){
 					if(everyinterval(100)){
+						gameArea.bossAttacking = true;
 						gameArea.pattern = Math.floor((Math.random() * (3 - 0)) + 0);
 						gameArea.patternTime = Math.floor((Math.random() *(6 - 1)) + 1);
 						if(gameArea.pattern==0){
@@ -443,6 +455,7 @@
 				}
 				if(gameArea.patternTime == 2){
 					if(everyinterval(200)){
+						gameArea.bossAttacking = true;
 						gameArea.pattern = Math.floor((Math.random() * (3 - 0)) + 0);
 						gameArea.patternTime = Math.floor((Math.random() *(6 - 1)) + 1);
 						if(gameArea.pattern==0){
@@ -458,6 +471,7 @@
 				}
 				if(gameArea.patternTime == 3){
 					if(everyinterval(300)){
+						gameArea.bossAttacking = true;
 						gameArea.pattern = Math.floor((Math.random() * (3 - 0)) + 0);
 						gameArea.patternTime = Math.floor((Math.random() *(6 - 1)) + 1);
 						if(gameArea.pattern==0){
@@ -473,6 +487,7 @@
 				}
 				if(gameArea.patternTime == 4){
 					if(everyinterval(400)){
+						gameArea.bossAttacking = true;
 						gameArea.pattern = Math.floor(Math.floor((Math.random() * (3 - 0)) + 0));
 						gameArea.patternTime = Math.floor((Math.random() *(6 - 1)) + 1);
 						if(gameArea.pattern==0){
@@ -488,6 +503,7 @@
 				}
 				if(gameArea.patternTime == 5){
 					if(everyinterval(500)){
+						gameArea.bossAttacking = true;
 						gameArea.pattern = Math.floor((Math.random() * (3 - 0)) + 0);
 						gameArea.patternTime = Math.floor((Math.random() *(6 - 1)) + 1);
 						if(gameArea.pattern==0){
@@ -518,7 +534,11 @@
 				}
 			}
 			if(gameArea.keys && gameArea.keys[82]){
-					gameArea.reset();
+				gameArea.reset();
+			}
+			if(gameArea.keys && gameArea.keys[88] && gameArea.bombs>0){
+				bomb = new animatedGraphic("images/explosion.png",0,0,25,25,playerImage.x,playerImage.y,25,25,3,5);
+				gameArea.bombexists=true;
 			}
 			for(i = 0; i < enemyBullet.length; i++){
 				enemyBullet[i].x+=enemyBullet[i].speex;
@@ -538,11 +558,30 @@
 					pbulletImage[i].update();
 				}
 			}
+			if(boss.aniframe==2){
+				boss.sy=0;
+				boss.anispeed=2;
+			}
+			if(gameArea.bossAttacking == true){
+				boss.sy=17;
+				boss.aniframe=0;
+				boss.anispeed=10;
+				gameArea.bossAttacking=false;
+			}
 			wall[1].update();
 			wall[2].update();
 			wall[3].update();
 			wall[4].update();
 			boss.update();
+			if(gameArea.bombexists){
+				bomb.width+=10;
+				bomb.x-=5;
+				bomb.height+=10;
+				bomb.y-=5;
+				bomb.update();
+			}
+			guide.x=boss.x;
+			guide.update();
 			gameOverText.update();
 			lives.text = "Lives: " + gameArea.lives;
 			lives.update();

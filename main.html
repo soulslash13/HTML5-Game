@@ -56,9 +56,23 @@
 		var pbulletImage = [];
 		var bomb;
 		var time;
+		var bgm;
+		var attackSound;
+		var hit;
+		var bombsound;
+		var gameoverjingle;
+		var victoryjingle;
 	
+		//Starts the game
 		function startGame(){
 			backDrop = new graphic("images/backdrop.png", 0, 0, "backdrop");
+			bgm = new sound("audio/boss1theme.wav", "bgm");
+			attackSound = new sound("audio/attackloop.wav", "bgm");
+			hit = new sound("audio/hit.wav");
+			bombsound = new sound("audio/bomb.wav");
+			gameoverjingle = new sound("audio/gameover.wav");
+			victoryjingle = new sound("audio/victory.wav");
+			bgm.play();
 			gameArea.start();
 			hitbox = new component(5,5,"blue",135,550, 0, 0);
 			playerImage = new animatedGraphic("images/soulveara_spritesheet.png",0,0,15,25,0,0,15,25,3,5);
@@ -76,7 +90,8 @@
 
 			
 		}
-
+		
+		//Canvas which holds all of the game data
 		var gameArea = {
 			canvas : document.createElement("canvas"),
 			start : function(){
@@ -132,14 +147,17 @@
 				lives = new text("20px", "serif", "white", 10, 20, "Lives:");
 				score = new text("20px", "serif", "white", 200, 20, "Score:");
 				playerImage = new animatedGraphic("images/soulveara_spritesheet.png",0,0,15,25,0,0,15,25,3,5);
+				bgm.play();
 			}
 		}
 		
+		//Allows coder to make something happen every so many frames
 		function everyinterval(n){
 			if((gameArea.frameNo / n) % 1 == 0) {return true;}
 			return false;
 		}
 		
+		//Allows coder to create objects in the game world (primarily hitboxes)
 		function component(width, height, color, x, y, sx, sy){
 			this.width = width;
 			this.height = height;
@@ -173,6 +191,7 @@
 			}
 		}
 		
+		//Allows the coder to create text in the game world
 		function text(size, font, color, x, y, text){
 			this.size = size;
 			this.font = font;
@@ -188,6 +207,27 @@
 			}
 		}
 		
+		//Allows the coder to make background music or sound effects
+		function sound(src, type){
+			this.sound = document.createElement("audio");
+			this.sound.src = src;
+			this.sound.setAttribute("preload", "auto");
+			this.sound.setAttribute("controls","none");
+			this.sound.style.display= "none";
+			if(type =="bgm"){
+				this.sound.loop=true;
+			}
+			document.body.appendChild(this.sound);
+			this.play = function(){
+				this.sound.play();
+			}
+			this.stop = function(){
+				this.sound.pause();
+			}
+			
+		}
+		
+		//Allows the coder to make an image appear in the game world
 		function graphic(image, x, y, type){
 			this.image = new Image();
 			this.image.src = image;
@@ -203,6 +243,7 @@
 			}
 		}
 		
+		//Allows the coder to make an animated sprite in the game world
 		function animatedGraphic(img, sx, sy, sw, sh, x, y, width, height, frames, anispeed){
 			this.image = new Image();
 			this.image.src = img;
@@ -230,8 +271,24 @@
 					this.aniframe=0;
 				}
 			}
+			this.crashWith = function(otherobj){
+				var myleft = this.x;
+				var myright = this.x+(this.width);
+				var mytop = this.y;
+				var mybottom = this.y + (this.height);
+				var otherleft = otherobj.x;
+				var otherright = otherobj.x+(otherobj.width);
+				var othertop = otherobj.y;
+				var otherbottom = otherobj.y+(otherobj.height);
+				var crash = true;
+				if((mybottom<othertop)||(mytop>otherbottom)||(myright<otherleft)||(myleft>otherright)){
+					crash = false;
+				}
+				return crash;
+			}
 		}
 		
+		//Creates a pattern of zig zag bullets
 		function zigZag(){
 			for(i = 0; i <= 300; i+=15){
 				if(i%30 == 0){
@@ -245,6 +302,7 @@
 			}
 		}
 		
+		//Creates the previous pattern, but inverted
 		function zigZagSwapped(){
 			for(i = 0; i <= 300; i+=15){
 				if(i%30 == 0){
@@ -258,6 +316,7 @@
 			}
 		}
 		
+		//Creates a sweeping pattern similar to Mario firebars
 		function fireBar(){
 			y = 0;
 			for(i = 0; i <=300; i+=10){
@@ -274,6 +333,7 @@
 			}
 		}
 		
+		//Creates a bell curve pattern which then crosses over itself
 		function wave(){
 			y = -30;
 			x = 2;
@@ -297,6 +357,7 @@
 			}
 		}
 		
+		//Allows the boss character to move to a set left side position
 		function bossLeft(){
 			while(boss.x>30){
 				boss.speex=-2;
@@ -306,6 +367,7 @@
 			boss.speex=0;
 		}
 		
+		//Allows the boss character to move to a set center position
 		function bossCenter(){
 			while(boss.x<130 || boss.x>130){
 				if(boss.x<130){
@@ -322,6 +384,7 @@
 			boss.speex=0;
 		}
 		
+		//Allows the boss character to move to a set right side position
 		function bossRight(){
 			while(boss.x<230){
 				boss.speex=2;
@@ -331,8 +394,12 @@
 			boss.speex=0;
 		}
 		
+		//Simulates the game every 16.66 miliseconds
 		function updateGameArea(){
+		
 			for(i = 0; i < enemyBullet.length; i++){
+			
+				//Clears the game area of projectiles and sets the player back to starting position if hit, then reduces the player's life count
 				if(hitbox.crashWith(enemyBullet[i]) && gameArea.lives>0){
 					explosion = new animatedGraphic("images/explosion.png",0,0,25,25,playerImage.x,playerImage.y,25,25,3,5);
 					hitbox.x = 135;
@@ -342,7 +409,11 @@
 					playerBullet = [];
 					pbulletImage = [];
 					gameArea.lives-=1;
+					attackSound.sound.currentTime = 0;
+					hit.play();
 				}
+				
+				//Causes a game over if the player's lives are 0 when they get hit
 				else if(hitbox.crashWith(enemyBullet[i])){
 					explosion = new animatedGraphic("images/explosion.png",0,0,25,25,playerImage.x,playerImage.y,25,25,3,5);
 					hitbox.width = 0;
@@ -351,36 +422,60 @@
 					hitbox.y=0;
 					playerImage = null;
 					gameArea.gameOver = true;
+					hit.play();
+					attackSound.stop();
+					bgm.stop();
+					gameoverjingle.play();
 					gameOverText.text ="Game Over";
 				}
+				
+				//Removes red bullets if they hit the bottom of the screen
 				if(enemyBullet[i].y>600){
 					enemyBullet.splice(i,1);
 					bulletImage.splice(i,1);
 				}
+				
+				//Removes bullets when hitting the player's bomb
 				if(gameArea.bombexists==true){
 					if(enemyBullet[i].crashWith(bomb)){
 						enemyBullet.splice(i,1);
 						bulletImage.splice(i,1);
 					}
+					
+					//Damages boss if hit by the player's bomb
+					if(boss.crashWith(bomb)){
+						gameArea.bossDamage+=.1;
+					}
 				}
 			}
+			
 			for(i = 0; i < playerBullet.length; i++){
+			
+				//Checks if player's bullets hit the boss, then damages it
 				if(playerBullet[i].crashWith(boss)){
 					playerBullet.splice(i,1);
 					pbulletImage.splice(i,1);
 					gameArea.bossDamage+=1;
 				}
+				
+				//Removes player's bullets when hitting the top boundary
 				if(playerBullet[i].crashWith(wall[1])){
 					playerBullet.splice(i,1);
 					pbulletImage.splice(i,1);
 				}
 			}
+			
+			//Stops tracing of objects
 			gameArea.clear();
+			
+			//Loops background
 			backDrop.y+=5;
 			if(backDrop.y == 600){
 				backDrop.y=0;
 			}
 			backDrop.update();
+			
+			//All of the player controls and their limitations based on hitting walls
 			hitbox.speex = 0;
 			hitbox.speedY = 0;
 			if(!gameArea.gameOver){
@@ -413,8 +508,22 @@
 					pbulletImage.push(new graphic("images/playerbullet.png", hitbox.x-3, hitbox.y));
 					playerBullet.push(new component(3, 3, null, hitbox.x+hitbox.width, hitbox.y, 0, -8));
 					pbulletImage.push(new graphic("images/playerbullet.png", hitbox.x-3, hitbox.y));
+					attackSound.play();
+				}
+				if(gameArea.keys && !gameArea.keys[90]){
+					attackSound.stop();
+					attackSound.sound.currentTime = 0;
+				}
+					//Allows the player to bomb by pressing X
+				if(gameArea.keys && gameArea.keys[88] && gameArea.bombs>0 && gameArea.bombexists==false){
+					bomb = new animatedGraphic("images/explosion.png",0,0,25,25,playerImage.x,playerImage.y,25,25,3,20);
+					gameArea.bombexists=true;
+					gameArea.bombs-=1;
+					bombsound.play();
 				}
 				hitbox.newPos();
+				
+				//Places player hitbox above player if Shift is held
 				if(gameArea.keys && gameArea.keys[16]){
 					playerImage.x = hitbox.x-5;
 					playerImage.y = hitbox.y-10;
@@ -428,9 +537,14 @@
 					playerImage.update();
 				}
 			}
+			
+			//Increases frame count
 			gameArea.frameNo += 1;
+			
+			//Checks if the boss has been defeated, then shrinks it and displays victory text
 			if(gameArea.bossDamage>=1000 || gameArea.frameNo>=7200 && !gameArea.gameOver){
 				gameArea.victory = true;
+				bgm.stop();
 				gameOverText.text ="You Won!"
 			}
 			if(gameArea.victory){
@@ -441,6 +555,8 @@
 					boss.width-=.5;
 				}
 			}
+			
+			//Simulates the boss's attacks when the player has not won
 			if(!gameArea.victory){
 				if(gameArea.patternTime == 0){
 					gameArea.patternTime = Math.floor((Math.random() *(6 - 1)) + 1);
@@ -541,14 +657,13 @@
 					}
 				}
 			}
+			
+			//Resets the game area when the player presses R
 			if(gameArea.keys && gameArea.keys[82]){
 				gameArea.reset();
 			}
-			if(gameArea.keys && gameArea.keys[88] && gameArea.bombs>0 && gameArea.bombexists==false){
-				bomb = new animatedGraphic("images/explosion.png",0,0,25,25,playerImage.x,playerImage.y,25,25,3,20);
-				gameArea.bombexists=true;
-				gameArea.bombs-=1;
-			}
+			
+			//Moves enemy bullets
 			for(i = 0; i < enemyBullet.length; i++){
 				enemyBullet[i].x+=enemyBullet[i].speex;
 				enemyBullet[i].y+=enemyBullet[i].speedY;
@@ -557,6 +672,8 @@
 				enemyBullet[i].update();
 				bulletImage[i].update();
 			}
+			
+			//Moves player bullets
 			for(i = 0; i < playerBullet.length; i++){
 				playerBullet[i].x+=playerBullet[i].speex;
 				pbulletImage[i].x=playerBullet[i].x;
@@ -567,6 +684,8 @@
 					pbulletImage[i].update();
 				}
 			}
+			
+			//Animates boss differently when attacking
 			if(boss.aniframe==2){
 				boss.sy=0;
 				boss.anispeed=2;
@@ -577,11 +696,16 @@
 				boss.anispeed=10;
 				gameArea.bossAttacking=false;
 			}
+			
+			//Makes sure walls keep existing
 			wall[1].update();
 			wall[2].update();
 			wall[3].update();
 			wall[4].update();
+			
 			boss.update();
+			
+			//Animates player bomb
 			if(gameArea.bombexists){
 				if(bomb.aniframe==bomb.frames-1){
 					bomb = null;
@@ -594,14 +718,19 @@
 				bomb.update();
 				
 			}
+			
+			//Makes guide follow the boss
 			guide.x=boss.x;
 			guide.update();
+			
 			gameOverText.update();
+			
+			//Updates all of the statistical text
 			lives.text = "Lives: " + gameArea.lives;
 			lives.update();
-			score.text = "Score: " + gameArea.bossDamage;
+			score.text = "Score: " + Math.floor(gameArea.bossDamage);
 			score.update();
-			if(gameArea.bossDamage%250==0){
+			if(Math.floor(gameArea.bossDamage)%250==0){
 				gameArea.bombs+=1;
 				gameArea.bossDamage+=1;
 			}
@@ -609,6 +738,10 @@
 			bombs.update();
 			time.text = "Time: " + Math.floor(gameArea.frameNo/60);
 			time.update();
+			if(attackSound.sound.ended){
+				gameArea.bombs+=5;
+			}
+			//Animates player death explosion (and creates a lot of meaningless errors)
 			if(explosion.aniframe!=explosion.frames-1){
 				explosion.update();
 			}

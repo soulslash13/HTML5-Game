@@ -545,10 +545,7 @@
 			if(gameArea.bossDamage>=1000 || gameArea.frameNo>=7200 && !gameArea.gameOver){
 				gameArea.victory = true;
 				bgm.stop();
-				if(playedjingle=false){
-					victoryjingle.play();
-				}
-				playedjingle=true;
+				victoryjingle.play();
 				gameOverText.text ="You Won!"
 			}
 			if(gameArea.victory){

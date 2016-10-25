@@ -62,6 +62,7 @@
 		var bombsound;
 		var gameoverjingle;
 		var victoryjingle;
+		var explosion;
 	
 		//Starts the game
 		function startGame(){
@@ -87,6 +88,7 @@
 			score = new text("20px", "serif", "white", 200, 20, "Score:");
 			bombs = new text("20px", "serif", "white", 10, 40, "Bombs:");
 			time = new text("20px", "serif", "white", 200, 40, "Time:");
+			explosion = new component(0,0,null,0,0,0,0);
 
 			
 		}
@@ -166,9 +168,11 @@
 			this.x = x;
 			this.y = y;
 			this.update = function(){
-				ctx = gameArea.context;
-				ctx.fillStyle = color;
-				ctx.fillRect(this.x,this.y,this.width,this.height);
+				if(color!=null){
+					ctx = gameArea.context;
+					ctx.fillStyle = color;
+					ctx.fillRect(this.x,this.y,this.width,this.height);
+				}
 			}
 			this.newPos = function(){
 				this.x += this.speex;
@@ -712,11 +716,11 @@
 					bomb = null;
 					gameArea.bombexists = false;
 				}
-				bomb.width+=10;
-				bomb.x-=5;
-				bomb.height+=10;
-				bomb.y-=5;
-				bomb.update();
+					bomb.width+=10;
+					bomb.x-=5;
+					bomb.height+=10;
+					bomb.y-=5;
+					bomb.update();
 				
 			}
 			
@@ -742,7 +746,7 @@
 			if(attackSound.sound.ended){
 				gameArea.bombs+=5;
 			}
-			//Animates player death explosion (and creates a lot of meaningless errors)
+			//Animates player death explosion (and no longer creates a lot of meaningless errors)
 			if(explosion.aniframe!=explosion.frames-1){
 				explosion.update();
 			}
